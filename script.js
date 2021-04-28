@@ -297,10 +297,10 @@ let drawCell = (puzzle, x, y) => {
     let cell = document.createElement('div')
     cell.className = 'cell cell-empty'
     cell.id = 'cell-' + x + '-' + y
-    cell.addEventListener('mousemove', () => {
+    cell.addEventListener('pointermove', () => {
         if (pointerIsDown && !solvedState) modifyCell(puzzle, cell, x, y)
     })
-    cell.addEventListener('mousedown', () => {
+    cell.addEventListener('pointerdown', () => {
         if (!solvedState) clickCell(puzzle, cell, x, y, /* isFirstCell */ true)
     })
     return cell
@@ -437,7 +437,7 @@ window.onload = () => {
         modal.className = modal.className.replace('modal-open', 'modal-closed')
     }
 
-    document.addEventListener('mouseup', () => {
+    document.addEventListener('pointerup', () => {
         pointerIsDown = false
         cellsModifiedThisClick = []
         let drawLength = document.getElementById('draw-length')
