@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<html>
+
+    <head>
+        <title>Tomo Tomo</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+
+        <link href="styles.css" rel="stylesheet">
+        <script src="script.js"></script>
+
+    </head>
+
+    <body>
+        <div id="main"></div>
+        <div id="buttons">
+            <button id="new">new</button>
+            <span class="fill"></span>
+            <button id="reset">reset</button>
+            <button id="solve">solve</button>
+            <button id="hint">hint</button>
+            <span class="fill"></span>
+            <button id="guess" class="button-unselected">guess</button>
+        </div>
+        <div class="modal modal-closed" id="new-modal">
+            <div class="modal-contents">
+                <span>new puzzle</span>
+                <button id="new-5">5x5</button>
+                <button id="new-10">10x10</button>
+                <button id="new-15">15x15</button>
+                <button id="new-20">20x20</button>
+                <button id="new-25">25x25</button>
+                <button id="new-30">30x30</button>
+                <button id="new-cancel">nevermind</button>
+            </div>
+        </div>
+        <div class="modal modal-closed" id="reset-modal">
+            <div class="modal-contents">
+                <span>reset puzzle?</span>
+                <button id="reset-yes">yes, reset it</button>
+                <button id="reset-no">no, nevermind</button>
+            </div>
+        </div>
+        <div class="modal modal-closed" id="solve-modal">
+            <div class="modal-contents">
+                <span>reveal solution?</span>
+                <button id="solve-yes">yes, solve it</button>
+                <button id="solve-no">no, nevermind</button>
+            </div>
+        </div>
+    </body>
+</html>
