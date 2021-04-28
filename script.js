@@ -297,12 +297,21 @@ let drawCell = (puzzle, x, y) => {
     let cell = document.createElement('div')
     cell.className = 'cell cell-empty'
     cell.id = 'cell-' + x + '-' + y
-    cell.addEventListener('pointermove', () => {
+
+    let pointerMove = (e) => {
+        e.preventDefault()
         if (pointerIsDown && !solvedState) modifyCell(puzzle, cell, x, y)
-    })
-    cell.addEventListener('pointerdown', () => {
+    }
+    cell.addEventListener('mousemove', pointerMove)
+    cell.addEventListener('touchmove', pointerMove, { passive: false })
+
+    let pointerDown = (e) => {
+        e.preventDefault()
         if (!solvedState) clickCell(puzzle, cell, x, y, /* isFirstCell */ true)
-    })
+    }
+    cell.addEventListener('mousedown', pointerDown)
+    cell.addEventListener('touchstart', pointerDown, { passive: false })
+
     return cell
 }
 
@@ -437,7 +446,8 @@ window.onload = () => {
         modal.className = modal.className.replace('modal-open', 'modal-closed')
     }
 
-    document.addEventListener('pointerup', () => {
+    let pointerUp = (e) => {
+        e.preventDefault()
         pointerIsDown = false
         cellsModifiedThisClick = []
         let drawLength = document.getElementById('draw-length')
@@ -446,7 +456,10 @@ window.onload = () => {
         let selectedColHints = document.getElementById('col-hints-' + firstCellClickedX)
         selectedRowHints.className = selectedRowHints.className.replace('hints-selected', 'hints-unselected')
         selectedColHints.className = selectedColHints.className.replace('hints-selected', 'hints-unselected')
-    })
+    }
+    document.addEventListener('mouseup', pointerUp)
+    document.addEventListener('touchend', pointerUp, { passive: false })
+    document.addEventListener('touchcancel', pointerUp, { passive: false })
     
     // new modal
     document.getElementById('new').addEventListener('click', () => {
