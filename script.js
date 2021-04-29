@@ -31,7 +31,7 @@ let colHintElements = []
 let rowHintsSelected = false
 let colHintsSelected = false
 
-let drawLengthElement = null
+let seqLengthIndicator = null
 let lastSequenceLength = 0
 
 let DOUBLE_CLICK_TIME = 300
@@ -272,8 +272,10 @@ let modifyCell = (x, y, isFirstCell) => {
         }
     }
 
-    if (sequenceLength !== lastSequenceLength && (sequenceLength > 3 || lastSequenceLength > 0)) {
-        drawLengthElement.innerText = sequenceLength
+    if (sequenceLength < lastSequenceLength || (sequenceLength !== lastSequenceLength && sequenceLength > 3)) {
+        seqLengthIndicator.innerText = sequenceLength <= 3 ? '' : sequenceLength
+        seqLengthIndicator.style.top = (gridY + cellSize * y + cellSize / 2 - 36) + 'px'
+        seqLengthIndicator.style.left = (gridX + cellSize * x + cellSize / 2 - 36) + 'px'
     }
     lastSequenceLength = sequenceLength
 
@@ -426,12 +428,6 @@ let drawBoard = () => {
     corner.className = 'board-corner'
     topOfBoard.appendChild(corner)
 
-    let drawLength = document.createElement('div')
-    drawLength.className = 'draw-length'
-    drawLength.id = 'draw-length'
-    corner.appendChild(drawLength)
-    drawLengthElement = drawLength
-
     let colHintsContainer = drawHints(colHints, 'col')
     colHintsContainer.id = 'col-hints'
     topOfBoard.appendChild(colHintsContainer)
@@ -450,6 +446,8 @@ let drawBoard = () => {
     let main = document.getElementById('main')
     main.innerHTML = ''
     main.appendChild(board)
+
+    seqLengthIndicator = document.getElementById('sequence-length')
 
     window.onresize()
 }
@@ -488,6 +486,7 @@ window.onresize = () => {
 
 window.onload = () => {
     let newPuzzle = (size) => {
+        solvedState = false
         createPuzzle(size, size)
         drawBoard()
         closeModal('new-modal')
@@ -508,7 +507,7 @@ window.onload = () => {
 
         cellsModifiedThisClick = []
 
-        drawLengthElement.innerText = ''
+        seqLengthIndicator.innerText = ''
         
         let selectedRowHints = rowHintElements[firstCellClickedY]
         let selectedColHints = colHintElements[firstCellClickedX]
