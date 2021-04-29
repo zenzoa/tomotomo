@@ -1,5 +1,6 @@
+// TODO: show loading spinner while puzzle is being generated
+// TODO: add overlap to solver
 // TODO: fade out solved hints
-// TODO: remove ambiguous/unsolveable solutions
 
 let pointerIsDown = false
 
@@ -26,6 +27,8 @@ let puzzleGrid = []
 let valueGrid = []
 let cellGrid = []
 
+let rowHints = []
+let colHints = []
 let rowHintElements = []
 let colHintElements = []
 let rowHintsSelected = false
@@ -117,6 +120,123 @@ let createPuzzle = (width, height) => {
         if (Math.random() < 0.5) drawLine()
         else drawCircle()
     }
+    
+    createHints()
+}
+
+let solvePuzzle = () => {
+    let solveLine = (hints, line) => {
+        if (hints.length === 0) return line
+
+        let possibilities = []
+        let sequenceIndex = 0
+        let startingPoints = Array(hints.length).fill(0)
+
+        let drawLine = () => {
+            let possibility = ''
+            for (let i = 0; i < hints.length; i++) {
+                if (startingPoints[i] - possibility.length >= 0) {
+                    let gap = '-'.repeat(startingPoints[i] - possibility.length)
+                    let seq = '#'.repeat(hints[i])
+                    possibility += gap + seq
+                } else {
+                    break
+                }
+            }
+            possibility = possibility.padEnd(line.length, '-')
+            return possibility.split('')
+        }
+
+        // find possibilities
+        while (sequenceIndex >= 0) {
+            let sequence = hints[sequenceIndex]
+            let start = startingPoints[sequenceIndex]
+            if (start + sequence > line.length) {
+                // no room left on line -> previous sequence
+                sequenceIndex--
+            } else if (line[start - 1] === '#') {
+                // reveals cell-true -> previous sequence
+                sequenceIndex--
+            } else if (line[start + sequence] === '#') {
+                // abutts cell-true -> keep looking
+            } else if (line.slice(start, start + sequence).includes('-')) {
+                // covers cell-false -> keep looking
+            } else {
+                // fits!
+                if (sequenceIndex === hints.length - 1) {
+                    // last sequence -> add possiblity and keep looking
+                    let possibility = drawLine()
+                    possibilities.push(possibility)
+                } else {
+                    // more sequences -> next sequence
+                    sequenceIndex++
+                    startingPoints[sequenceIndex] = start + sequence + 1
+                    continue
+                }
+            }
+            startingPoints[sequenceIndex]++
+        }
+
+        if (possibilities.length === 0) return line
+
+        // merge possibilities
+        let mergedPossibilities = []
+        for (let i = 0; i < line.length; i++) {
+            let cell = ''
+            if (line[i] !== ' ') {
+                cell = line[i]
+            } else {
+                possibilities.forEach(possibility => {
+                    if (!cell) {
+                        cell = possibility[i]
+                    } else if (cell !== possibility[i]) {
+                        cell = ' '
+                    }
+                })
+            }
+            mergedPossibilities.push(cell)
+        }
+
+        return mergedPossibilities
+    }
+
+    let solutions = Array(puzzleHeight).fill(0).map(_ => Array(puzzleWidth).fill(' '))
+    let passes = 0
+    let solveComplete = false
+    while (!solveComplete && passes < 100) {
+        solveComplete = true
+
+        // solve rows
+        let solvedRows = []
+        for (let y = 0; y < puzzleHeight; y++) {
+            let solvedRow = solveLine(rowHints[y], solutions[y])
+            if (solvedRow.includes(' ')) solveComplete = false
+            solvedRows.push(solvedRow)
+        }
+
+        // solve columns
+        let solvedCols = Array(puzzleWidth).fill(0)
+        for (let x = 0; x < puzzleWidth; x++) {
+            let col = Array(puzzleHeight).fill(' ')
+            for (let y = 0; y < puzzleHeight; y++) {
+                col[y] = solvedRows[y][x]
+            }
+            let solvedCol = solveLine(colHints[x], col)
+            if (solvedCol.includes(' ')) solveComplete = false
+            solvedCols[x] = solvedCol
+        }
+
+        // combine solutions
+        for (let x = 0; x < puzzleWidth; x++) {
+            for (let y = 0; y < puzzleHeight; y++) {
+                solutions[y][x] = solvedCols[x][y]
+            }
+        }
+
+        passes++
+    }
+
+    return solveComplete
 }
 
 let doesSolutionWork = () => {
@@ -134,6 +254,9 @@ let doesSolutionWork = () => {
 }
 
 let createHints = () => {
+    rowHints = []
+    colHints = []
+
     let getHints = (cells) => {
         let hints = []
         let sequenceLength = 0
@@ -149,15 +272,13 @@ let createHints = () => {
         return hints
     }
 
-    let rowHints = puzzleGrid.map(row => getHints(row))
+    rowHints = puzzleGrid.map(row => getHints(row))
 
-    let colHints = []
+    colHints = []
     for (let x = 0; x < puzzleWidth; x++) {
         let column = puzzleGrid.map(row => row[x])
         colHints.push(getHints(column))
     }
-    
-    return { rowHints, colHints }
 }
 
 let revealOneCell = () => {
@@ -400,8 +521,6 @@ let drawHints = (hints, type) => {
 }
 
 let drawBoard = () => {
-    let { rowHints, colHints } = createHints()
-
     cellGrid = []
     valueGrid = []
     for (let y = 0; y < puzzleHeight; y++) {
@@ -487,7 +606,16 @@ window.onresize = () => {
 window.onload = () => {
     let newPuzzle = (size) => {
         solvedState = false
-        createPuzzle(size, size)
+
+        let passes = 0
+        while (passes < 100) {
+            createPuzzle(size, size)
+            if (solvePuzzle()) {
+                break
+            }
+            passes++
+        }
+
         drawBoard()
         closeModal('new-modal')
     }
@@ -540,9 +668,6 @@ window.onload = () => {
     })
     document.getElementById('new-25').addEventListener('click', () => {
         newPuzzle(25)
-    })
-    document.getElementById('new-30').addEventListener('click', () => {
-        newPuzzle(30)
     })
     document.getElementById('new-cancel').addEventListener('click', () => {
         closeModal('new-modal')
