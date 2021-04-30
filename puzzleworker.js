@@ -4,13 +4,13 @@ onmessage = (e) => {
     let rowHints = null
     let colHints = null
     let passes = 0
-    while (passes < 10) {
+    while (passes < 20) {
         puzzleGrid = createPuzzle(size, size)
         let hints = createHints(puzzleGrid)
         rowHints = hints.rowHints
         colHints = hints.colHints
         if (solvePuzzle(rowHints, colHints, size, size)) {
-            console.log('created the perfect puzzle!')
+            console.log('puzzle created successfully in', passes + 1, (passes > 0 ? 'passes' : 'pass'))
             break
         }
         passes++

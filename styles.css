@@ -215,7 +215,7 @@ body {
     background: rgba(64, 64, 64, 0.9);
 }
 
-.modal-closed {
+.modal-closed, .modal-closed * {
     display: none;
 }
 

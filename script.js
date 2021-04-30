@@ -63,7 +63,7 @@ let revealOneCell = () => {
         let cellValue = valueGrid[y][x]
         let puzzleValue = puzzleGrid[y][x]
         if (cellValue !== puzzleValue) {
-            setCell(x, y, puzzleValue, /* isFirstCell */ true)
+            setCell(x, y, puzzleValue)
             break
         }
         guesses++
@@ -74,7 +74,7 @@ let drawPuzzleSolution = () => {
     for (let y = 0; y < puzzleHeight; y++) {
         for (let x = 0; x < puzzleWidth; x++) {
             let puzzleValue = puzzleGrid[y][x]
-            setCell(x, y, puzzleValue, /* isFirstCell */ true)
+            setCell(x, y, puzzleValue)
         }
     }
     let board = document.getElementById('board')
@@ -95,7 +95,7 @@ let clearGrid = () => {
     }
 }
 
-let setCell = (x, y, value, isFirstCell) => {
+let setCell = (x, y, value) => {
     let oldValue = valueGrid[y][x]
     
     if (oldValue === value) return
@@ -120,10 +120,10 @@ let setCell = (x, y, value, isFirstCell) => {
 }
 
 let clearCell = (x, y) => {
-    setCell(x, y, ' ', /* isFirstCell */ true)
+    setCell(x, y, ' ')
 }
 
-let modifyCell = (x, y, isFirstCell) => {
+let modifyCell = (x, y) => {
     cellsModifiedThisClick.forEach(cell => clearCell(cell.x, cell.y))
     cellsModifiedThisClick = []
 
@@ -136,7 +136,7 @@ let modifyCell = (x, y, isFirstCell) => {
         let sign = y - firstCellClickedY > 0 ? 1 : -1
         for (let i = 0; i < sequenceLength; i++) {
             let y2 = firstCellClickedY + (sign * i)
-            setCell(x, y2, cellValueThisClick, isFirstCell)
+            setCell(x, y2, cellValueThisClick)
         }
         if (sequenceLength > 1 && !colHintsSelected) {
             colHintsSelected = true
@@ -154,7 +154,7 @@ let modifyCell = (x, y, isFirstCell) => {
         let sign = x - firstCellClickedX > 0 ? 1 : -1
         for (let i = 0; i < sequenceLength; i++) {
             let x2 = firstCellClickedX + (sign * i)
-            setCell(x2, y, cellValueThisClick, isFirstCell)
+            setCell(x2, y, cellValueThisClick)
         }
         if (sequenceLength > 1 && !rowHintsSelected) {
             rowHintsSelected = true
@@ -169,8 +169,8 @@ let modifyCell = (x, y, isFirstCell) => {
 
     if (sequenceLength < lastSequenceLength || (sequenceLength !== lastSequenceLength && sequenceLength > 3)) {
         seqLengthIndicator.innerText = sequenceLength <= 3 ? '' : sequenceLength
-        seqLengthIndicator.style.top = (gridY + cellSize * y + cellSize / 2 - 36) + 'px'
-        seqLengthIndicator.style.left = (gridX + cellSize * x + cellSize / 2 - 36) + 'px'
+        seqLengthIndicator.style.top = (gridY + cellSize * y + cellSize / 2 - 48) + 'px'
+        seqLengthIndicator.style.left = (gridX + cellSize * x + cellSize / 2 - 48) + 'px'
     }
     lastSequenceLength = sequenceLength
 
@@ -210,7 +210,7 @@ let clickCell = (x, y) => {
     firstCellClickedX = x
     firstCellClickedY = y
 
-    modifyCell(x, y, /* isFirstCell */ true)
+    modifyCell(x, y)
 }
 
 let drawCell = (x, y) => {
