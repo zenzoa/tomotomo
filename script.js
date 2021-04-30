@@ -84,22 +84,53 @@ let revealOneCell = () => {
 }
 
 let checkHintsForLine = (hints, line) => {
-    let sequences = line.join('')
-        .replaceAll('-', ' ')
-        .replaceAll('?', ' ')
-        .split(' ')
-        .map(s => s.length)
-        .filter(s => s > 0)
-    
     let solvedHints = []
+
+    // get sequences
+    let i = 0
     let seqIndex = 0
+    let sequences = []
+    let startingPoints = []
+    while (i < line.length) {
+        let cell = line[i]
+        if (cell === '#') {
+            if (!sequences[seqIndex]) sequences[seqIndex] = 0
+            if (isNaN(startingPoints[seqIndex])) startingPoints[seqIndex] = i
+            sequences[seqIndex]++
+        } else if (cell === ' ' || cell === '-') {
+            if (sequences[seqIndex] && sequences[seqIndex] > 0) {
+                seqIndex++
+            }
+        }
+        i++
+    }
+
+    // check sequences
+    seqIndex = 0
     let hintIndex = 0
     while (seqIndex < sequences.length && hintIndex < hints.length) {
-        // TODO: check to make sure there's room for prev hints to fit before, and next hints to fit after
         if (sequences[seqIndex] === hints[hintIndex]) {
-            solvedHints.push(hintIndex)
+            let beforeHints = 0
+            let afterHints = 0
+            for (i = 0; i < hints.length; i++) {
+                if (i < hintIndex) {
+                    beforeHints += hints[i] + 1
+                } else if (i > hintIndex) {
+                    afterHints += hints[i] + 1
+                }
+            }
+            let roomBefore = beforeHints <= startingPoints[seqIndex]
+            let roomAfter = afterHints <= line.length - (startingPoints[seqIndex] + sequences[seqIndex])
+            if (roomBefore && roomAfter) {
+                solvedHints.push(hintIndex)
+                seqIndex++
+                hintIndex++
+            } else {
+                seqIndex++
+            }
+        } else if (hintIndex === hints.length - 1) {
             seqIndex++
-            hintIndex++
+            hintIndex = 0
         } else {
             hintIndex++
         }
@@ -168,6 +199,7 @@ let clearGrid = () => {
         board.className = board.className.replace('board-solved', 'board-unsolved')
         solvedState = false
     }
+    checkHints()
 }
 
 let setCell = (x, y, value) => {
