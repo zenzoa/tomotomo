@@ -1,4 +1,3 @@
-// TODO: random gradients
 // TODO: dark mode
 
 let puzzleWorker = null
@@ -39,6 +38,37 @@ let seqLengthIndicator = null
 let lastSequenceLength = 0
 
 let DOUBLE_CLICK_TIME = 300
+
+let gradientColors = [
+    '#4158D0',
+    '#C850C0',
+    '#FFCC70',
+    '#FF5F6D',
+    '#FFC371',
+    '#16BFFD',
+    '#CB3066',
+    '#EF629F',
+    '#db36a4',
+    '#1fddff',
+    '#d04ed6',
+    '#4DA0B0',
+    '#D39D38',
+    '#5614B0',
+    '#DBD65C',
+    '#fd746c',
+    '#ff9068'
+]
+
+let setGradient = () => {
+    let angle = Math.floor(Math.random() * 359)
+    let midpoint = Math.floor(Math.random() * 50) + 25
+    let color1 = gradientColors[Math.floor(Math.random() * gradientColors.length)]
+    let color2 = gradientColors[Math.floor(Math.random() * gradientColors.length)]
+    let color3 = gradientColors[Math.floor(Math.random() * gradientColors.length)]
+    let gradient = `linear-gradient(${angle}deg, ${color1} 0%, ${color2} ${midpoint}%, ${color3} 100%)`
+    let root = document.querySelector(':root')
+    root.style.setProperty('--gridgradient', gradient)
+}
 
 let revealOneCell = () => {
     let guesses = 0
@@ -383,6 +413,8 @@ let drawBoard = () => {
     main.appendChild(board)
 
     seqLengthIndicator = document.getElementById('sequence-length')
+
+    setGradient()
 
     window.onresize()
 }
