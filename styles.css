@@ -7,6 +7,7 @@
 
     --hintcolor: #888;
     --hintcolor-selected: #666;
+    --hintcolor-solved: #ccc;
 
     --seqlengthbg: #ddd;
     --seqlengthfg: black;
@@ -200,6 +201,11 @@ body {
 .hints-selected .hint {
     font-weight: bold;
     color: var(--hintcolor-selected);
+}
+
+.hint-solved {
+    font-style: italic;
+    color: var(--hintcolor-solved);
 }
 
 .board-solved .hint {

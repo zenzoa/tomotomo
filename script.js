@@ -1,4 +1,3 @@
-// TODO: fade out solved hints
 // TODO: random gradients
 // TODO: dark mode
 
@@ -41,20 +40,6 @@ let lastSequenceLength = 0
 
 let DOUBLE_CLICK_TIME = 300
 
-let doesSolutionWork = () => {
-    let solutionWorks = true
-    for (let y = 0; y < puzzleHeight; y++) {
-        for (let x = 0; x < puzzleWidth; x++) {
-            let userValue = valueGrid[y][x]
-            let puzzleValue = puzzleGrid[y][x]
-            if (userValue !== puzzleValue) {
-                solutionWorks = false
-            }
-        }
-    }
-    return solutionWorks
-}
-
 let revealOneCell = () => {
     let guesses = 0
     while (guesses < 1000) {
@@ -67,6 +52,66 @@ let revealOneCell = () => {
             break
         }
         guesses++
+    }
+}
+
+let checkHintsForLine = (hints, line) => {
+    let sequences = line.join('')
+        .replaceAll('-', ' ')
+        .replaceAll('?', ' ')
+        .split(' ')
+        .map(s => s.length)
+        .filter(s => s > 0)
+    
+    let solvedHints = []
+    let seqIndex = 0
+    let hintIndex = 0
+    while (seqIndex < sequences.length && hintIndex < hints.length) {
+        // TODO: check to make sure there's room for prev hints to fit before, and next hints to fit after
+        if (sequences[seqIndex] === hints[hintIndex]) {
+            solvedHints.push(hintIndex)
+            seqIndex++
+            hintIndex++
+        } else {
+            hintIndex++
+        }
+    }
+
+    return solvedHints
+}
+
+let checkHints = () => {
+    let allHintsSolved = true
+
+    let oldSolvedHints = document.querySelectorAll('.hint-solved')
+    for (i = 0; i < oldSolvedHints.length; i++) {
+        oldSolvedHints[i].className = 'hint hint-unsolved'
+    }
+
+    let colGrid = Array(puzzleWidth).fill(null).map(_ => [])
+    rowHints.forEach((rowHintsGroup, y) => {
+        let solvedRowHints = checkHintsForLine(rowHintsGroup, valueGrid[y])
+        if (solvedRowHints.length !== rowHintsGroup.length) allHintsSolved = false
+        solvedRowHints.forEach(solvedHintIndex => {
+            let hintEl = document.getElementById('row-hint-' + y + '-' + solvedHintIndex)
+            hintEl.className = 'hint hint-solved'
+        })
+        for (x = 0; x < puzzleWidth; x++) {
+            colGrid[x].push(valueGrid[y][x])
+        }
+    })
+
+    colHints.forEach((colHintsGroup, x) => {
+        let solvedColHints = checkHintsForLine(colHintsGroup, colGrid[x])
+        if (solvedColHints.length !== colHintsGroup.length) allHintsSolved = false
+        solvedColHints.forEach(solvedHintIndex => {
+            let hintEl = document.getElementById('col-hint-' + x + '-' + solvedHintIndex)
+            hintEl.className = 'hint hint-solved'
+        })
+    })
+
+    if (allHintsSolved) {
+        drawPuzzleSolution()
     }
 }
 
@@ -173,10 +218,6 @@ let modifyCell = (x, y) => {
         seqLengthIndicator.style.left = (gridX + cellSize * x + cellSize / 2 - 48) + 'px'
     }
     lastSequenceLength = sequenceLength
-
-    if (doesSolutionWork()) {
-        drawPuzzleSolution()
-    }
 }
 
 let clickCell = (x, y) => {
@@ -279,11 +320,12 @@ let drawHints = (hints, type) => {
 
     hints.forEach((hintGroup, i) => {
         let hintGroupElement = document.createElement('div')
-        hintGroupElement.className = 'hint-group hints-unselected hints-unsolved'
+        hintGroupElement.className = 'hint-group hints-unselected'
         hintGroupElement.id = type + '-hints-' + i
-        hintGroup.forEach(hint => {
+        hintGroup.forEach((hint, j) => {
             let hintElement = document.createElement('div')
-            hintElement.className = 'hint'
+            hintElement.className = 'hint hint-unsolved'
+            hintElement.id = type + '-hint-' + i + '-' + j
             hintElement.innerText = hint
             hintGroupElement.appendChild(hintElement)
         })
@@ -423,6 +465,8 @@ window.onload = () => {
             selectedColHints.className = selectedColHints.className.replace('hints-selected', 'hints-unselected')
             rowHintsSelected = false
             colHintsSelected = false
+
+            checkHints()
             
             lastSequenceLength = 0
         }
