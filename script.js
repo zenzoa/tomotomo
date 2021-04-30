@@ -40,23 +40,21 @@ let lastSequenceLength = 0
 let DOUBLE_CLICK_TIME = 300
 
 let gradientColors = [
-    '#4158D0',
-    '#C850C0',
-    '#FFCC70',
-    '#FF5F6D',
-    '#FFC371',
-    '#16BFFD',
-    '#CB3066',
-    '#EF629F',
-    '#db36a4',
-    '#1fddff',
-    '#d04ed6',
-    '#4DA0B0',
-    '#D39D38',
-    '#5614B0',
-    '#DBD65C',
-    '#fd746c',
-    '#ff9068'
+    '#59a5dd',
+    '#496bbe',
+    '#e55388',
+    '#e57d88',
+    '#e59f88',
+    '#e5d988',
+    '#5ac5cc',
+    '#6dd5cc',
+    '#92e89a',
+    '#48b37c',
+    '#b0316e',
+    '#c74c66',
+    '#db885c',
+    '#c773bd',
+    '#8e4994'
 ]
 
 let setGradient = () => {
@@ -146,15 +144,17 @@ let checkHints = () => {
 }
 
 let drawPuzzleSolution = () => {
-    for (let y = 0; y < puzzleHeight; y++) {
-        for (let x = 0; x < puzzleWidth; x++) {
-            let puzzleValue = puzzleGrid[y][x]
-            setCell(x, y, puzzleValue)
+    if (!solvedState) {
+        for (let y = 0; y < puzzleHeight; y++) {
+            for (let x = 0; x < puzzleWidth; x++) {
+                let puzzleValue = puzzleGrid[y][x]
+                setCell(x, y, puzzleValue)
+            }
         }
+        let board = document.getElementById('board')
+        board.className = board.className.replace('board-unsolved', 'board-solved')
+        solvedState = true
     }
-    let board = document.getElementById('board')
-    board.className = board.className.replace('board-unsolved', 'board-solved')
-    solvedState = true
 }
 
 let clearGrid = () => {
@@ -444,10 +444,6 @@ let setCellSize = () => {
 }
 
 let newPuzzle = (size) => {
-    solvedState = false
-    puzzleWidth = size
-    puzzleHeight = size
-
     let spinner = document.getElementById('spinner-container')
     spinner.className = ''
 
@@ -455,12 +451,19 @@ let newPuzzle = (size) => {
         puzzleWorker = new Worker('puzzleworker.js')
         puzzleWorker.postMessage(size)
         puzzleWorker.onmessage = (e) => {
+            
+            solvedState = false
+            puzzleWidth = size
+            puzzleHeight = size
             puzzleGrid = e.data.puzzleGrid
             rowHints = e.data.rowHints
             colHints = e.data.colHints
             spinner.className = 'hidden'
+
             drawBoard()
+
             closeModal('new-modal')
+
         }
     }
 }
