@@ -138,6 +138,34 @@ let createHints = (puzzleGrid) => {
 }
 
 let solvePuzzle = (rowHints, colHints, puzzleWidth, puzzleHeight) => {
+    let findOverlaps = (hints, size) => {
+        // draw each sequence from the start of the line
+        let line = ''
+        for (let i = 0; i < hints.length; i++) {
+            line += '#'.repeat(hints[i])
+            if (i < hints.length - 1) {
+                line += ' '
+            }
+        }
+
+        // find out how many empty spaces are left at the end of the line
+        let leftoverSpaces = size - line.length
+        
+        // remove that many cells from the start of each sequence
+        let newLine = ''
+        for (let i = 0; i < hints.length; i++) {
+            let sequenceLength = Math.max(0, hints[i] - leftoverSpaces)
+            newLine += ' '.repeat(Math.min(leftoverSpaces, hints[i]))
+            newLine += '#'.repeat(sequenceLength)
+            if (i < hints.length - 1) {
+                newLine += ' '
+            }
+        }
+        newLine = newLine.padEnd(size, ' ')
+
+        return newLine.split('')
+    }
+
     let solveLine = (hints, line) => {
         if (hints.length === 0) return line
 
@@ -213,7 +241,19 @@ let solvePuzzle = (rowHints, colHints, puzzleWidth, puzzleHeight) => {
         return mergedPossibilities
     }
 
+    
+    let rowSolutions = rowHints.map(rowHintGroup => findOverlaps(rowHintGroup, puzzleWidth))
+    let colSolutions = colHints.map(colHintGroup => findOverlaps(colHintGroup, puzzleHeight))
+    
     let solutions = Array(puzzleHeight).fill(0).map(_ => Array(puzzleWidth).fill(' '))
+    for (let x = 0; x < puzzleWidth; x++) {
+        for (let y = 0; y < puzzleHeight; y++) {
+            if (rowSolutions[y][x] === '#' || colSolutions[x][y] === '#') {
+                solutions[y][x] = '#'
+            }
+        }
+    }
+
     let passes = 0
     let solveComplete = false
     while (!solveComplete && passes < 100) {

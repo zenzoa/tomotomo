@@ -1,5 +1,8 @@
-// TODO: add overlap to solver
-// TODO: fade out solved hints 
+// TODO: fade out solved hints
+// TODO: random gradients
+// TODO: dark mode
+
+let puzzleWorker = null
 
 let pointerIsDown = false
 
@@ -448,6 +451,9 @@ window.onload = () => {
         newPuzzle(25)
     })
     document.getElementById('new-cancel').addEventListener('click', () => {
+        if (puzzleWorker) puzzleWorker.terminate()
+        let spinner = document.getElementById('spinner-container')
+        spinner.className = 'hidden'
         closeModal('new-modal')
     })
     
