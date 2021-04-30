@@ -99,8 +99,8 @@ let setCell = (x, y, value, isFirstCell) => {
     let oldValue = valueGrid[y][x]
     
     if (oldValue === value) return
-    if (oldValue === '#' && !isFirstCell && guessing) return
-    if (oldValue === '-' && !isFirstCell && (guessing || value === '#')) return
+    if (oldValue === '#' && guessing) return
+    if (oldValue === '-' && (guessing || value === '#')) return
 
     valueGrid[y][x] = value
     cellsModifiedThisClick.push({ x, y })
