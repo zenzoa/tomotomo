@@ -139,6 +139,28 @@ body {
     margin: 1px;
 }
 
+.board-solved .row:nth-child(2n) .cell-true:nth-child(2n)::after {
+    animation: cell-bounce 1.0s infinite ease-in-out;
+    animation-delay: 0s;
+}
+.board-solved .row:nth-child(2n) .cell-true:nth-child(2n + 1)::after {
+    animation: cell-bounce 0.8s infinite ease-in-out;
+    animation-delay: 0.5s;
+}
+.board-solved .row:nth-child(2n+1) .cell-true:nth-child(2n)::after {
+    animation: cell-bounce 0.9s infinite ease-in-out;
+    animation-delay: 1.0s;
+}
+.board-solved .row:nth-child(2n+1) .cell-true:nth-child(2n + 1)::after {
+    animation: cell-bounce 0.7s infinite ease-in-out;
+    animation-delay: 1.5s;
+}
+
+@keyframes cell-bounce {
+    0%, 100% { transform: scale(1.0); }
+    50% { transform: scale(0.8); }
+}
+
 .board-solved .cell-false::after {
     opacity: 0;
 }
