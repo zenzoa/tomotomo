@@ -1,5 +1,3 @@
-// TODO: dark mode
-
 let puzzleWorker = null
 
 let pointerIsDown = false
@@ -37,7 +35,7 @@ let colHintsSelected = false
 let seqLengthIndicator = null
 let lastSequenceLength = 0
 
-let DOUBLE_CLICK_TIME = 500
+let DOUBLE_CLICK_TIME = 400
 
 let gradientColors = [
     '#59a5dd',
@@ -68,75 +66,92 @@ let setGradient = () => {
     root.style.setProperty('--gridgradient', gradient)
 }
 
-let revealOneCell = () => {
-    let guesses = 0
-    while (guesses < 1000) {
-        let x = Math.floor(Math.random() * puzzleWidth)
-        let y = Math.floor(Math.random() * puzzleHeight)
-        let cellValue = valueGrid[y][x]
-        let puzzleValue = puzzleGrid[y][x]
-        if (cellValue !== puzzleValue) {
-            setCell(x, y, puzzleValue)
-            break
+let markIncorrectCells = () => {
+    for (let y = 0; y < puzzleHeight; y++) {
+        for (let x = 0; x < puzzleWidth; x++) {
+            let cellValue = valueGrid[y][x]
+            let puzzleValue = puzzleGrid[y][x]
+            if ((cellValue === '#' && puzzleValue === '-') || (cellValue === '-' && puzzleValue === '#')) {
+                cellGrid[y][x].className = cellGrid[y][x].className.replace('cell-unmarked', 'cell-marked')
+            }
         }
-        guesses++
     }
 }
 
 let checkHintsForLine = (hints, line) => {
     let solvedHints = []
 
-    // get sequences
     let i = 0
-    let seqIndex = 0
     let sequences = []
     let startingPoints = []
+    let currentSequence = 0
+    let currentStartingPoint = 0
+    let isInSequence = false
     while (i < line.length) {
         let cell = line[i]
-        if (cell === '#') {
-            if (!sequences[seqIndex]) sequences[seqIndex] = 0
-            if (isNaN(startingPoints[seqIndex])) startingPoints[seqIndex] = i
-            sequences[seqIndex]++
-        } else if (cell === ' ' || cell === '-') {
-            if (sequences[seqIndex] && sequences[seqIndex] > 0) {
-                seqIndex++
-            }
+        if ((cell === '#' || cell === '?') && (i === 0 || line[i - 1] === '-')) {
+            // first cell in sequence
+            isInSequence = true
+            currentSequence = 1
+            currentStartingPoint = i
+        } else if ((cell === '#' || cell === '?') && isInSequence) {
+            // cell in middle of sequence
+            currentSequence++
+        } else if ((cell === '-') && isInSequence) {
+            // end current sequence
+            sequences.push(currentSequence)
+            startingPoints.push(currentStartingPoint)
+            isInSequence = false
+            currentSequence = 0
+            currentStartingPoint = 0
+        } else if (cell === ' ' && isInSequence) {
+            // cancel current sequence
+            isInSequence = false
+            currentSequence = 0
+            currentStartingPoint = 0
         }
+
         i++
+    }
+    if (currentSequence) {
+        sequences.push(currentSequence)
+        startingPoints.push(currentStartingPoint)
     }
 
     // check sequences
+    let lineIsBroken = false
     seqIndex = 0
     let hintIndex = 0
+    let pointInLine = 0
     while (seqIndex < sequences.length && hintIndex < hints.length) {
-        if (sequences[seqIndex] === hints[hintIndex]) {
-            let beforeHints = 0
-            let afterHints = 0
-            for (i = 0; i < hints.length; i++) {
-                if (i < hintIndex) {
-                    beforeHints += hints[i] + 1
-                } else if (i > hintIndex) {
-                    afterHints += hints[i] + 1
-                }
-            }
-            let roomBefore = beforeHints <= startingPoints[seqIndex]
-            let roomAfter = afterHints <= line.length - (startingPoints[seqIndex] + sequences[seqIndex])
-            if (roomBefore && roomAfter) {
+        let seq = sequences[seqIndex]
+        let hint = hints[hintIndex]
+        let startingPoint = startingPoints[seqIndex]
+
+        let hintsAfter = 0
+        for (i = hintIndex + 1; i < hints.length; i++) {
+            hintsAfter += hints[i] + 1
+        }
+        let endPoint = line.length - hintsAfter
+
+        if (seq === hint && startingPoint >= pointInLine && startingPoint + seq <= endPoint) {
+            if (hints[hintIndex - 1] !== seq || solvedHints.includes(hintIndex - 1)) {
                 solvedHints.push(hintIndex)
-                seqIndex++
-                hintIndex++
-            } else {
-                seqIndex++
             }
-        } else if (hintIndex === hints.length - 1) {
             seqIndex++
-            hintIndex = 0
+            hintIndex++
+            pointInLine = startingPoint + seq + 1
+            continue
+        } else if (hintIndex === hints.length - 1) {
+            lineIsBroken = true
+            break
         } else {
             hintIndex++
+            pointInLine += hint + 1
         }
     }
 
-    return solvedHints
+    return lineIsBroken ? [] : solvedHints
 }
 
 let checkHints = () => {
@@ -212,18 +227,13 @@ let setCell = (x, y, value) => {
     valueGrid[y][x] = value
     cellsModifiedThisClick.push({ x, y })
 
-    let oldClass = 'cell-empty'
-    if (oldValue === '#') oldClass = 'cell-true'
-    else if (oldValue === '-') oldClass = 'cell-false'
-    else if (oldValue === '?') oldClass = 'cell-guess'
-
     let newClass = 'cell-empty'
     if (value === '#') newClass = 'cell-true'
     else if (value === '-') newClass = 'cell-false'
     else if (value === '?') newClass = 'cell-guess'
 
     let cell = cellGrid[y][x]
-    cell.className = cell.className.replace(oldClass, newClass)
+    cell.className = 'cell ' + newClass + ' cell-unmarked'
 }
 
 let clearCell = (x, y) => {
@@ -247,12 +257,12 @@ let modifyCell = (x, y) => {
         }
         if (!colHintsSelected) {
             colHintsSelected = true
-            selectedColHints.className = selectedColHints.className.replace('hints-unselected', 'hints-selected')
+            selectedColHints.className = 'hint-group hints-selected'
         }
     } else {
         if (colHintsSelected) {
             colHintsSelected = false
-            selectedColHints.className = selectedColHints.className.replace('hints-selected', 'hints-unselected')
+            selectedColHints.className = 'hint-group hints-unselected'
         }
     }
 
@@ -265,12 +275,12 @@ let modifyCell = (x, y) => {
         }
         if (!rowHintsSelected) {
             rowHintsSelected = true
-            selectedRowHints.className = selectedRowHints.className.replace('hints-unselected', 'hints-selected')
+            selectedRowHints.className = 'hint-group hints-selected'
         }
     } else {
         if (rowHintsSelected) {
             rowHintsSelected = false
-            selectedRowHints.className = selectedRowHints.className.replace('hints-selected', 'hints-unselected')
+            selectedRowHints.className = 'hint-group hints-unselected'
         }
     }
 
@@ -316,7 +326,7 @@ let clickCell = (x, y) => {
 
 let drawCell = (x, y) => {
     let cell = document.createElement('div')
-    cell.className = 'cell cell-empty'
+    cell.className = 'cell cell-empty cell-unmarked'
     cell.id = 'cell-' + x + '-' + y
     cellGrid[y][x] = cell
 
@@ -517,24 +527,25 @@ window.onresize = () => {
 
 window.onload = () => {
     let pointerUp = (e) => {
-        pointerIsDown = false
-        if (cellGrid.length > 0) {
-            cellsModifiedThisClick = []
 
-            seqLengthIndicator.innerText = ''
-        
-            let selectedRowHints = rowHintElements[firstCellClickedY]
-            let selectedColHints = colHintElements[firstCellClickedX]
-            selectedRowHints.className = selectedRowHints.className.replace('hints-selected', 'hints-unselected')
-            selectedColHints.className = selectedColHints.className.replace('hints-selected', 'hints-unselected')
+        pointerIsDown = false
+        cellsModifiedThisClick = []
+        seqLengthIndicator.innerText = ''
+        lastSequenceLength = 0
+
+        setTimeout(() => {
+
+            rowHintElements.forEach(el => {el.className = 'hint-group hints-unselected'})
+            colHintElements.forEach(el => {el.className = 'hint-group hints-unselected'})
             rowHintsSelected = false
             colHintsSelected = false
 
             checkHints()
-            
-            lastSequenceLength = 0
-        }
+
+        }, DOUBLE_CLICK_TIME)
+
     }
+
     document.addEventListener('mouseup', pointerUp)
     document.addEventListener('touchend', pointerUp)
     document.addEventListener('touchcancel', pointerUp)
@@ -589,9 +600,9 @@ window.onload = () => {
         closeModal('solve-modal')
     })
 
-    // hint button
-    document.getElementById('hint').addEventListener('click', () => {
-        revealOneCell()
+    // repair button
+    document.getElementById('repair').addEventListener('click', () => {
+        markIncorrectCells()
     })
 
     // guess button

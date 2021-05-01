@@ -97,7 +97,7 @@ let createPuzzle = (width, height) => {
 
     }
 
-    let iterations = width
+    let iterations = width * 1.2
     for (let i = 0; i < iterations; i++) {
         if (Math.random() < 0.5) drawLine()
         else drawCircle()
