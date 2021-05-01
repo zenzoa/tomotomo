@@ -37,7 +37,7 @@ let colHintsSelected = false
 let seqLengthIndicator = null
 let lastSequenceLength = 0
 
-let DOUBLE_CLICK_TIME = 300
+let DOUBLE_CLICK_TIME = 500
 
 let gradientColors = [
     '#59a5dd',
@@ -245,7 +245,7 @@ let modifyCell = (x, y) => {
             let y2 = firstCellClickedY + (sign * i)
             setCell(x, y2, cellValueThisClick)
         }
-        if (sequenceLength > 1 && !colHintsSelected) {
+        if (!colHintsSelected) {
             colHintsSelected = true
             selectedColHints.className = selectedColHints.className.replace('hints-unselected', 'hints-selected')
         }
@@ -263,7 +263,7 @@ let modifyCell = (x, y) => {
             let x2 = firstCellClickedX + (sign * i)
             setCell(x2, y, cellValueThisClick)
         }
-        if (sequenceLength > 1 && !rowHintsSelected) {
+        if (!rowHintsSelected) {
             rowHintsSelected = true
             selectedRowHints.className = selectedRowHints.className.replace('hints-unselected', 'hints-selected')
         }
@@ -287,21 +287,19 @@ let clickCell = (x, y) => {
 
     let clickTime = Date.now()
     if (timeOfLastClick > 0 && clickTime - timeOfLastClick < DOUBLE_CLICK_TIME) {
-        doubleClicked = !doubleClicked
+        doubleClicked = true
     } else {
         doubleClicked = false
     }
     timeOfLastClick = clickTime
 
-    let cellIsEmpty = valueGrid[y][x] === ' '
-    let cellIsGuess = valueGrid[y][x] === '?'
     if (guessing) {
-        if (cellIsEmpty) cellValueThisClick = '?'
-        else cellValueThisClick = ' '
+        if (valueGrid[y][x] === '?') cellValueThisClick = ' '
+        else cellValueThisClick = '?'
     } else {
         if (doubleClicked && lastCellClickedX === x && lastCellClickedY === y) {
             cellValueThisClick = '-'
-        } else if (cellIsEmpty || cellIsGuess) {
+        } else if (valueGrid[y][x] === ' ' || valueGrid[y][x] === '?') {
             cellValueThisClick = '#'
         } else {
             cellValueThisClick = ' '
@@ -495,7 +493,6 @@ let newPuzzle = (size) => {
             drawBoard()
 
             closeModal('new-modal')
-
         }
     }
 }

@@ -103,7 +103,7 @@ body {
     display: block;
     position: absolute;
     top: 0; bottom: 0; left: 0; right: 0;
-    transition: border-radius ease-out 150ms, margin ease-out 150ms, opacity ease-out 150ms;
+    transition: border-radius ease-out 100ms, margin ease-out 100ms, opacity ease-out 100ms;
 }
 
 .cell-empty::after {
@@ -235,11 +235,12 @@ body {
     height: 10px;
     text-align: center;
     color: var(--hintcolor);
-    transition: all ease-out 200ms;
+    transition: color ease-out 200ms, transform ease-in-out 200ms;
 }
 
 .hints-selected .hint {
     font-weight: bold;
+    transform: scale(1.5);
     color: var(--hintcolor-selected);
 }
 
