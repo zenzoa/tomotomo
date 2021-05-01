@@ -35,7 +35,7 @@ let colHintsSelected = false
 let seqLengthIndicator = null
 let lastSequenceLength = 0
 
-let DOUBLE_CLICK_TIME = 400
+let DOUBLE_CLICK_TIME = 300
 
 let gradientColors = [
     '#59a5dd',
@@ -80,7 +80,9 @@ let markIncorrectCells = () => {
 
 let checkHintsForLine = (hints, line) => {
     let solvedHints = []
+    let isLineBroken = false
 
+    // get sequences
     let i = 0
     let sequences = []
     let startingPoints = []
@@ -119,39 +121,29 @@ let checkHintsForLine = (hints, line) => {
     }
 
     // check sequences
-    let lineIsBroken = false
-    seqIndex = 0
-    let hintIndex = 0
-    let pointInLine = 0
-    while (seqIndex < sequences.length && hintIndex < hints.length) {
-        let seq = sequences[seqIndex]
-        let hint = hints[hintIndex]
+    sequences.forEach((seq, seqIndex) => {
         let startingPoint = startingPoints[seqIndex]
-
-        let hintsAfter = 0
-        for (i = hintIndex + 1; i < hints.length; i++) {
-            hintsAfter += hints[i] + 1
-        }
-        let endPoint = line.length - hintsAfter
-
-        if (seq === hint && startingPoint >= pointInLine && startingPoint + seq <= endPoint) {
-            if (hints[hintIndex - 1] !== seq || solvedHints.includes(hintIndex - 1)) {
+        let spaceBefore = 0
+        let spaceAfter = hints.reduce((prev, curr) => (prev + curr + 1), 0)
+        let hintMatched = false
+        hints.forEach((hint, hintIndex) => {
+            spaceAfter -= (hint + 1)
+            if (
+                seq === hint &&
+                !hintMatched &&
+                startingPoint >= spaceBefore &&
+                (line.length - startingPoint - seq) >= spaceAfter &&
+                !solvedHints.includes(hintIndex)
+            ) {
                 solvedHints.push(hintIndex)
+                hintMatched = true
             }
-            seqIndex++
-            hintIndex++
-            pointInLine = startingPoint + seq + 1
-            continue
-        } else if (hintIndex === hints.length - 1) {
-            lineIsBroken = true
-            break
-        } else {
-            hintIndex++
-            pointInLine += hint + 1
-        }
-    }
+            spaceBefore += (hint + 1)
+        })
+        if (!hintMatched) isLineBroken = true
+    })
 
-    return lineIsBroken ? [] : solvedHints
+    return isLineBroken ? [] : solvedHints
 }
 
 let checkHints = () => {
@@ -600,8 +592,8 @@ window.onload = () => {
         closeModal('solve-modal')
     })
 
-    // repair button
-    document.getElementById('repair').addEventListener('click', () => {
+    // check button
+    document.getElementById('check').addEventListener('click', () => {
         markIncorrectCells()
     })
 
