@@ -143,6 +143,21 @@ let checkHintsForLine = (hints, line) => {
         if (!hintMatched) isLineBroken = true
     })
 
+    // remove ambiguously solved hints
+    hints.forEach((hint, hintIndex) => {
+        if (solvedHints.includes(hintIndex)) {
+            let prevHint = hintIndex - 1
+            let nextHint = hintIndex + 1
+            let hasUnsolvedIdenticalNeighbor = (
+                (hints[prevHint] === hint && !solvedHints.includes(prevHint)) ||
+                (hints[nextHint] === hint && !solvedHints.includes(nextHint))
+            )
+            if (hasUnsolvedIdenticalNeighbor) {
+                solvedHints = solvedHints.filter(h => h !== hintIndex)
+            }
+        }
+    })
+
     return isLineBroken ? [] : solvedHints
 }
 
