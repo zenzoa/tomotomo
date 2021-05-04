@@ -83,78 +83,71 @@ let checkHintsForLine = (hints, line) => {
     let isLineBroken = false
 
     // get sequences
-    let i = 0
     let sequences = []
-    let startingPoints = []
-    let currentSequence = 0
-    let currentStartingPoint = 0
-    let isInSequence = false
-    while (i < line.length) {
+    let seqStarts = []
+    let currentSequence = ''
+    let currentStart = -1
+    for (let i = 0; i < line.length; i++) {
         let cell = line[i]
-        if ((cell === '#' || cell === '?') && (i === 0 || line[i - 1] === '-')) {
-            // first cell in sequence
-            isInSequence = true
-            currentSequence = 1
-            currentStartingPoint = i
-        } else if ((cell === '#' || cell === '?') && isInSequence) {
-            // cell in middle of sequence
-            currentSequence++
-        } else if ((cell === '-') && isInSequence) {
-            // end current sequence
-            sequences.push(currentSequence)
-            startingPoints.push(currentStartingPoint)
-            isInSequence = false
-            currentSequence = 0
-            currentStartingPoint = 0
-        } else if (cell === ' ' && isInSequence) {
-            // cancel current sequence
-            isInSequence = false
-            currentSequence = 0
-            currentStartingPoint = 0
+        let lastCell = currentSequence[currentSequence.length - 1]
+        if (
+            (cell === '#' || cell === '?') &&
+            (lastCell === ' ' || lastCell === '#' || i === 0)
+        ) {
+            currentSequence += '#'
+            if (currentStart < 0) currentStart = i
         }
-
-        i++
-    }
-    if (currentSequence) {
-        sequences.push(currentSequence)
-        startingPoints.push(currentStartingPoint)
+        if (cell === '-') {
+            currentSequence += ' '
+            if (currentStart < 0) currentStart = i
+        }
+        if (cell === ' ' || i === line.length - 1) {
+            if (
+                currentSequence.length > 0 &&
+                currentSequence.includes('#') &&
+                (lastCell === ' ' || ((cell === '#' || cell === '-') && i === line.length - 1))
+            ) {
+                sequences.push(currentSequence)
+                seqStarts.push(currentStart)
+                currentStart = -1
+            }
+            currentSequence = []
+        }
     }
 
     // check sequences
-    sequences.forEach((seq, seqIndex) => {
-        let startingPoint = startingPoints[seqIndex]
-        let spaceBefore = 0
-        let spaceAfter = hints.reduce((prev, curr) => (prev + curr + 1), 0)
-        let hintMatched = false
-        hints.forEach((hint, hintIndex) => {
-            spaceAfter -= (hint + 1)
-            if (
-                seq === hint &&
-                !hintMatched &&
-                startingPoint >= spaceBefore &&
-                (line.length - startingPoint - seq) >= spaceAfter &&
-                !solvedHints.includes(hintIndex)
-            ) {
-                solvedHints.push(hintIndex)
-                hintMatched = true
-            }
-            spaceBefore += (hint + 1)
-        })
-        if (!hintMatched) isLineBroken = true
-    })
+    sequences.forEach((sequence, seqIndex) => {
+        let seqParts = sequence.split(' ').filter(s => s.trim().length > 0)
+        let seqStart = seqStarts[seqIndex]
+        let startHintIndexes = []
 
-    // remove ambiguously solved hints
-    hints.forEach((hint, hintIndex) => {
-        if (solvedHints.includes(hintIndex)) {
-            let prevHint = hintIndex - 1
-            let nextHint = hintIndex + 1
-            let hasUnsolvedIdenticalNeighbor = (
-                (hints[prevHint] === hint && !solvedHints.includes(prevHint)) ||
-                (hints[nextHint] === hint && !solvedHints.includes(nextHint))
-            )
-            if (hasUnsolvedIdenticalNeighbor) {
-                solvedHints = solvedHints.filter(h => h !== hintIndex)
-            }
+        hints.forEach((_, startHintIndex) => {
+            let minSpaceBefore = hints.slice(0, startHintIndex).reduce((prev, curr) => (prev + curr + 1), 0) - 1
+            if (seqStart < minSpaceBefore) return
+
+            let currentHintIndex = startHintIndex
+            let seqFitsHints = true
+            seqParts.forEach(seqPart => {
+                if (seqPart.length === hints[currentHintIndex]) {
+                    currentHintIndex++
+                } else {
+                    seqFitsHints = false
+                }
+            })
+
+            let minSpaceAfter = hints
+                .slice(startHintIndex + seqParts.length)
+                .reduce((prev, curr) => (prev + curr + 1), 0) - 1
+            let spaceAfter = line.length - seqStart - sequence.length
+            if (spaceAfter < minSpaceAfter) seqFitsHints = false
+
+            if (seqFitsHints) startHintIndexes.push(startHintIndex)
+        })
+
+        if (startHintIndexes.length === 1) {
+            seqParts.forEach((_, i) => {
+                solvedHints.push(startHintIndexes[0] + i)
+            })
         }
     })
 
