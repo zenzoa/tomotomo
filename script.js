@@ -86,32 +86,39 @@ let checkHintsForLine = (hints, line) => {
     let sequences = []
     let seqStarts = []
     let currentSequence = ''
+    let currentRun = ''
     let currentStart = -1
     for (let i = 0; i < line.length; i++) {
         let cell = line[i]
-        let lastCell = currentSequence[currentSequence.length - 1]
+        let lastCell = line[i - 1]
         if (
-            (cell === '#' || cell === '?') &&
-            (lastCell === ' ' || lastCell === '#' || i === 0)
+            cell === '#' &&
+            (lastCell === '-' || i === 0 ||
+            (lastCell === '#' && currentStart >= 0))
         ) {
-            currentSequence += '#'
+            currentRun += '#'
             if (currentStart < 0) currentStart = i
         }
         if (cell === '-') {
-            currentSequence += ' '
+            currentSequence += currentRun + ' '
+            currentRun = ''
             if (currentStart < 0) currentStart = i
         }
-        if (cell === ' ' || i === line.length - 1) {
-            if (
-                currentSequence.length > 0 &&
-                currentSequence.includes('#') &&
-                (lastCell === ' ' || ((cell === '#' || cell === '-') && i === line.length - 1))
-            ) {
+        if (cell === ' ') {
+            if (currentSequence.includes('#')) {
                 sequences.push(currentSequence)
                 seqStarts.push(currentStart)
-                currentStart = -1
             }
+            currentRun = ''
             currentSequence = []
+            currentStart = -1
+        }
+        if (i === line.length - 1 && (cell === '#' || cell === '-')) {
+            if (currentRun.includes('#')) currentSequence += currentRun
+            if (currentSequence.includes('#')) {
+                sequences.push(currentSequence)
+                seqStarts.push(currentStart)
+            }
         }
     }
 
@@ -284,7 +291,7 @@ let modifyCell = (x, y) => {
         }
     }
 
-    if (sequenceLength < lastSequenceLength || (sequenceLength !== lastSequenceLength && sequenceLength > 3)) {
+    if (sequenceLength < lastSequenceLength || (sequenceLength !== lastSequenceLength && sequenceLength > 2)) {
         seqLengthIndicator.innerText = sequenceLength <= 3 ? '' : sequenceLength
         seqLengthIndicator.style.top = (gridY + cellSize * y + cellSize / 2 - 48) + 'px'
         seqLengthIndicator.style.left = (gridX + cellSize * x + cellSize / 2 - 48) + 'px'
