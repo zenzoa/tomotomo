@@ -229,7 +229,7 @@ let drawPuzzleSolution = () => {
 let clearGrid = () => {
     for (let y = 0; y < puzzleHeight; y++) {
         for (let x = 0; x < puzzleWidth; x++) {
-            clearCell(x, y)
+            setCell(x, y, ' ')
         }
     }
     if (solvedState) {
@@ -248,7 +248,7 @@ let setCell = (x, y, value) => {
     if (oldValue === '-' && (guessing || value === '#')) return
 
     valueGrid[y][x] = value
-    cellsModifiedThisClick.push({ x, y })
+    cellsModifiedThisClick.push({ x, y, oldValue })
 
     let newClass = 'cell-empty'
     if (value === '#') newClass = 'cell-true'
@@ -260,12 +260,8 @@ let setCell = (x, y, value) => {
     cell.className = 'cell ' + newClass + ' cell-unmarked'
 }
 
-let clearCell = (x, y) => {
-    setCell(x, y, ' ')
-}
-
 let modifyCell = (x, y) => {
-    cellsModifiedThisClick.forEach(cell => clearCell(cell.x, cell.y))
+    cellsModifiedThisClick.forEach(cell => setCell(cell.x, cell.y, cell.oldValue))
     cellsModifiedThisClick = []
 
     let selectedRowHints = rowHintElements[firstCellClickedY]
