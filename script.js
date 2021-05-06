@@ -82,6 +82,19 @@ let checkHintsForLine = (hints, line) => {
     let solvedHints = []
     let isLineBroken = false
 
+    let containsGuesses = false
+    line = line.map(c => {
+        if (c === '?') {
+            containsGuesses = true
+            return '#'
+        } else if (c === '&') {
+            containsGuesses = true
+            return '-'
+        } else {
+            return c
+        }
+    })
+
     // get sequences
     let sequences = []
     let seqStarts = []
@@ -158,7 +171,10 @@ let checkHintsForLine = (hints, line) => {
         }
     })
 
-    return isLineBroken ? [] : solvedHints
+    return {
+        solvedHints: isLineBroken ? [] : solvedHints,
+        containsGuesses
+    }
 }
 
 let checkHints = () => {
@@ -171,9 +187,9 @@ let checkHints = () => {
 
     let colGrid = Array(puzzleWidth).fill(null).map(_ => [])
     rowHints.forEach((rowHintsGroup, y) => {
-        let solvedRowHints = checkHintsForLine(rowHintsGroup, valueGrid[y])
-        if (solvedRowHints.length !== rowHintsGroup.length) allHintsSolved = false
-        solvedRowHints.forEach(solvedHintIndex => {
+        let { solvedHints, containsGuesses } = checkHintsForLine(rowHintsGroup, valueGrid[y])
+        if (containsGuesses || solvedHints.length !== rowHintsGroup.length) allHintsSolved = false
+        solvedHints.forEach(solvedHintIndex => {
             let hintEl = document.getElementById('row-hint-' + y + '-' + solvedHintIndex)
             hintEl.className = 'hint hint-solved'
         })
@@ -183,9 +199,9 @@ let checkHints = () => {
     })
 
     colHints.forEach((colHintsGroup, x) => {
-        let solvedColHints = checkHintsForLine(colHintsGroup, colGrid[x])
-        if (solvedColHints.length !== colHintsGroup.length) allHintsSolved = false
-        solvedColHints.forEach(solvedHintIndex => {
+        let { solvedHints, containsGuesses } = checkHintsForLine(colHintsGroup, colGrid[x])
+        if (containsGuesses || solvedHints.length !== colHintsGroup.length) allHintsSolved = false
+        solvedHints.forEach(solvedHintIndex => {
             let hintEl = document.getElementById('col-hint-' + x + '-' + solvedHintIndex)
             hintEl.className = 'hint hint-solved'
         })
@@ -237,7 +253,8 @@ let setCell = (x, y, value) => {
     let newClass = 'cell-empty'
     if (value === '#') newClass = 'cell-true'
     else if (value === '-') newClass = 'cell-false'
-    else if (value === '?') newClass = 'cell-guess'
+    else if (value === '?') newClass = 'cell-guess-true'
+    else if (value === '&') newClass = 'cell-guess-false'
 
     let cell = cellGrid[y][x]
     cell.className = 'cell ' + newClass + ' cell-unmarked'
@@ -292,7 +309,7 @@ let modifyCell = (x, y) => {
     }
 
     if (sequenceLength < lastSequenceLength || (sequenceLength !== lastSequenceLength && sequenceLength > 2)) {
-        seqLengthIndicator.innerText = sequenceLength <= 3 ? '' : sequenceLength
+        seqLengthIndicator.innerText = sequenceLength <= 2 ? '' : sequenceLength
         seqLengthIndicator.style.top = (gridY + cellSize * y + cellSize / 2 - 48) + 'px'
         seqLengthIndicator.style.left = (gridX + cellSize * x + cellSize / 2 - 48) + 'px'
     }
@@ -311,12 +328,19 @@ let clickCell = (x, y) => {
     timeOfLastClick = clickTime
 
     if (guessing) {
-        if (valueGrid[y][x] === '?') cellValueThisClick = ' '
-        else cellValueThisClick = '?'
+        if (doubleClicked && lastCellClickedX === x && lastCellClickedY === y) {
+            if (valueGrid[y][x] === ' ' || valueGrid[y][x] === '?') {
+                cellValueThisClick = '&'
+            }
+        } else if (valueGrid[y][x] === ' ') {
+            cellValueThisClick = '?'
+        } else {
+            cellValueThisClick = ' '
+        }
     } else {
         if (doubleClicked && lastCellClickedX === x && lastCellClickedY === y) {
             cellValueThisClick = '-'
-        } else if (valueGrid[y][x] === ' ' || valueGrid[y][x] === '?') {
+        } else if (valueGrid[y][x] === ' ' || valueGrid[y][x] === '?' || valueGrid[y][x] === '&') {
             cellValueThisClick = '#'
         } else {
             cellValueThisClick = ' '

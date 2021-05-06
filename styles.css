@@ -126,10 +126,17 @@ body {
     margin: 5px;
 }
 
-.cell-guess::after {
+.cell-guess-true::after {
     background: white;
     border-radius: 30%;
     margin: 3px;
+    opacity: 0.5;
+}
+
+.cell-guess-false::after {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 30%;
+    margin: 6px;
     opacity: 0.5;
 }
 
