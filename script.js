@@ -245,7 +245,7 @@ let setCell = (x, y, value) => {
     
     if (oldValue === value) return
     if (oldValue === '#' && guessing) return
-    if (oldValue === '-' && (guessing || value === '#')) return
+    if (oldValue === '-' && guessing) return
 
     valueGrid[y][x] = value
     cellsModifiedThisClick.push({ x, y, oldValue })
@@ -325,10 +325,8 @@ let clickCell = (x, y) => {
 
     if (guessing) {
         if (doubleClicked && lastCellClickedX === x && lastCellClickedY === y) {
-            if (valueGrid[y][x] === ' ' || valueGrid[y][x] === '?') {
-                cellValueThisClick = '&'
-            }
-        } else if (valueGrid[y][x] === ' ') {
+            cellValueThisClick = '&'
+        } else if (valueGrid[y][x] !== '?') {
             cellValueThisClick = '?'
         } else {
             cellValueThisClick = ' '
@@ -336,7 +334,7 @@ let clickCell = (x, y) => {
     } else {
         if (doubleClicked && lastCellClickedX === x && lastCellClickedY === y) {
             cellValueThisClick = '-'
-        } else if (valueGrid[y][x] === ' ' || valueGrid[y][x] === '?' || valueGrid[y][x] === '&') {
+        } else if (valueGrid[y][x] !== '#') {
             cellValueThisClick = '#'
         } else {
             cellValueThisClick = ' '
