@@ -269,12 +269,15 @@ let modifyCell = (x, y) => {
     let selectedColHints = colHintElements[firstCellClickedX]
     let sequenceLength = 0
 
+    firstCellSet = false
+
     if (x === firstCellClickedX) {
         sequenceLength = Math.abs(y - firstCellClickedY) + 1
         let sign = y - firstCellClickedY > 0 ? 1 : -1
         for (let i = 0; i < sequenceLength; i++) {
             let y2 = firstCellClickedY + (sign * i)
             setCell(x, y2, cellValueThisClick)
+            if (y2 === firstCellClickedY) firstCellSet = true
         }
         if (!colHintsSelected) {
             colHintsSelected = true
@@ -292,7 +295,9 @@ let modifyCell = (x, y) => {
         let sign = x - firstCellClickedX > 0 ? 1 : -1
         for (let i = 0; i < sequenceLength; i++) {
             let x2 = firstCellClickedX + (sign * i)
-            setCell(x2, y, cellValueThisClick)
+            if (x2 !== firstCellClickedX || !firstCellSet) {
+                setCell(x2, y, cellValueThisClick)
+            }
         }
         if (!rowHintsSelected) {
             rowHintsSelected = true
@@ -327,7 +332,7 @@ let clickCell = (x, y) => {
     if (guessing) {
         if (doubleClicked && lastCellClickedX === x && lastCellClickedY === y) {
             cellValueThisClick = '&'
-        } else if (valueGrid[y][x] !== '?') {
+        } else if (valueGrid[y][x] !== '?' && valueGrid[y][x] !== '&') {
             cellValueThisClick = '?'
         } else {
             cellValueThisClick = ' '
@@ -335,7 +340,7 @@ let clickCell = (x, y) => {
     } else {
         if (doubleClicked && lastCellClickedX === x && lastCellClickedY === y) {
             cellValueThisClick = '-'
-        } else if (valueGrid[y][x] !== '#') {
+        } else if (valueGrid[y][x] !== '#' && valueGrid[y][x] !== '-') {
             cellValueThisClick = '#'
         } else {
             cellValueThisClick = ' '
