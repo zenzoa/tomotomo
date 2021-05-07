@@ -238,6 +238,7 @@ let clearGrid = () => {
         solvedState = false
     }
     checkHints()
+    cellsModifiedThisClick = []
 }
 
 let setCell = (x, y, value) => {
