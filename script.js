@@ -265,12 +265,14 @@ let clearGrid = () => {
     cellsModifiedThisClick = []
 }
 
-let setCell = (x, y, value) => {
+let setCell = (x, y, value, isFirstCell) => {
     let oldValue = valueGrid[y][x]
     
     if (oldValue === value) return
     if (oldValue === '#' && guessing) return
     if (oldValue === '-' && guessing) return
+    if (oldValue === '#' && value === '-' && !isFirstCell) return
+    if (oldValue === '-' && value === '#' && !isFirstCell) return
 
     valueGrid[y][x] = value
     cellsModifiedThisClick.push({ x, y, oldValue })
@@ -294,13 +296,14 @@ let modifyCell = (x, y) => {
     let sequenceLength = 0
 
     firstCellSet = false
+    let isFirstCell = x === firstCellClickedX && y === firstCellClickedY
 
     if (x === firstCellClickedX) {
         sequenceLength = Math.abs(y - firstCellClickedY) + 1
         let sign = y - firstCellClickedY > 0 ? 1 : -1
         for (let i = 0; i < sequenceLength; i++) {
             let y2 = firstCellClickedY + (sign * i)
-            setCell(x, y2, cellValueThisClick)
+            setCell(x, y2, cellValueThisClick, isFirstCell)
             if (y2 === firstCellClickedY) firstCellSet = true
         }
         if (!colHintsSelected) {
@@ -320,7 +323,7 @@ let modifyCell = (x, y) => {
         for (let i = 0; i < sequenceLength; i++) {
             let x2 = firstCellClickedX + (sign * i)
             if (x2 !== firstCellClickedX || !firstCellSet) {
-                setCell(x2, y, cellValueThisClick)
+                setCell(x2, y, cellValueThisClick, isFirstCell)
             }
         }
         if (!rowHintsSelected) {
@@ -736,5 +739,5 @@ window.onload = () => {
     setTimeout(() => {
         let splashscreen = document.getElementById('splashscreen')
         splashscreen.className = 'hidden'
-    }, 2000)
+    }, 1000)
 }
