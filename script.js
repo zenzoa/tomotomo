@@ -593,6 +593,7 @@ let setLightMode = () => {
     root.style.setProperty('--modalshadowcolor', 'rgba(64, 64, 64, 0.1)')
     let darkmodeButton = document.getElementById('darkmode')
     darkmodeButton.innerHTML = '<i class="sun-icon"></i>'
+    document.body.className = 'lightmode'
     isDarkMode = false
 }
 
@@ -617,6 +618,7 @@ let setDarkMode = () => {
     root.style.setProperty('--modalshadowcolor', 'rgba(0, 0, 0, 0.1)')
     let darkmodeButton = document.getElementById('darkmode')
     darkmodeButton.innerHTML = '<i class="moon-icon"></i>'
+    document.body.className = 'darkmode'
     isDarkMode = true
 }
 
@@ -729,4 +731,10 @@ window.onload = () => {
 
     // start with 10x10 puzzle
     newPuzzle(10)
+
+    // fade out splashscreen
+    setTimeout(() => {
+        let splashscreen = document.getElementById('splashscreen')
+        splashscreen.className = 'hidden'
+    }, 2000)
 }

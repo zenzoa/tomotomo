@@ -46,6 +46,23 @@ body {
     background-image: linear-gradient(var(--bgcolor) 80%, var(--bgcolor2));
 }
 
+body::before {
+    position: absolute;
+    top: -60px; left: -60px;
+    content: '';
+    display: block;
+    background-image: url("./tomotomo-logo-small.png");
+    width: 300px;
+    height: 300px;
+    transform: scale(0.5);
+    opacity: 0.06;
+}
+
+body.darkmode::before {
+    opacity: 0.1;
+    filter: invert();
+}
+
 @media (max-width: 800px), (max-height: 800px) {
     body {
         font-size: 10px;
@@ -54,6 +71,37 @@ body {
 
 #main {
     text-align: center;
+}
+
+#splashscreen {
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    animation: splashscreen-fade 2s ease;
+}
+
+#splashscreen img {
+    width: 100%;
+    animation: splashscreen-logo 2s linear;
+}
+
+#splashscreen.hidden {
+    display: none;
+}
+
+@keyframes splashscreen-fade {
+    0%, 70% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes splashscreen-logo {
+    0%, 70% { transform: rotate(0deg) scale(1); }
+    85% { transform: rotate(180deg) scale(0.5); }
+    100% { transform: rotate(360deg) scale(0); }
 }
 
 .board, .modal, #sequence-length { 
