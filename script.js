@@ -67,14 +67,36 @@ let setGradient = () => {
 }
 
 let markIncorrectCells = () => {
+    let allCorrect = true
     for (let y = 0; y < puzzleHeight; y++) {
         for (let x = 0; x < puzzleWidth; x++) {
             let cellValue = valueGrid[y][x]
             let puzzleValue = puzzleGrid[y][x]
             if ((cellValue === '#' && puzzleValue === '-') || (cellValue === '-' && puzzleValue === '#')) {
                 cellGrid[y][x].className = cellGrid[y][x].className.replace('cell-unmarked', 'cell-marked')
+                allCorrect = false
             }
         }
+    }
+    if (allCorrect) {
+        let grid = document.getElementById('grid')
+        let checkmarkContainer = document.createElement('div')
+        checkmarkContainer.id = 'checkmark-container'
+        let checkmark = document.createElement('div')
+        checkmark.className = 'checkmark'
+        checkmarkContainer.appendChild(checkmark)
+        grid.appendChild(checkmarkContainer)
+        setTimeout(() => {
+            checkmark.remove()
+            checkmarkContainer.remove()
+        }, 1000)
+    } else {
+        setTimeout(() => {
+            let markedCells = document.querySelectorAll('.cell-marked')
+            for (let i = 0; i < markedCells.length; i++) {
+                markedCells[i].className = markedCells[i].className.replace('cell-marked', 'cell-unmarked')
+            }
+        }, 1500)
     }
 }
 

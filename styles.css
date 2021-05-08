@@ -141,8 +141,14 @@ body {
 }
 
 .cell-marked::after {
-    box-shadow: 0 0 0 4px orange, 0 0 10px 0 black;
+    box-shadow: 0 0 0 0 orange, 0 0 0 0 black;
     z-index: 1;
+    animation: cell-marked-shadow 1.5s ease-in-out;
+}
+
+@keyframes cell-marked-shadow {
+    0%, 100% { box-shadow: 0 0 0 0 orange, 0 0 0 0 black; }
+    30%, 70% { box-shadow: 0 0 0 4px orange, 0 0 6px 0 black; }
 }
 
 .board-solved .cell-true::after {
@@ -414,4 +420,46 @@ button:focus, button:hover {
 @keyframes sk-bounce {
     0%, 100% { transform: scale(0.0); }
     50% { transform: scale(1.0); }
+}
+
+#checkmark-container {
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#checkmark-container::before {
+    content: '';
+    position: absolute;
+    margin-top: -30px;
+    display: block;
+    background: white;
+    box-shadow: 0 0 0px 0px rgba(255, 255, 255, 0);
+    width: 1px;
+    height: 1px;
+    border-radius: 100%;
+    animation: checkmark-shadow 1s ease-in;
+}
+
+.checkmark {
+    display: inline-block;
+    transform: translateY(-30px) rotate(45deg);
+    height: 100px;
+    width: 50px;
+    border-bottom: 30px solid #78b13f;
+    border-right: 30px solid #78b13f;
+    opacity: 0;
+    animation: checkmark-opacity 1s ease-in;
+}
+
+@keyframes checkmark-shadow {
+    0%, 100% { box-shadow: 0 0 0 0px white; }
+    30%, 70% { box-shadow: 0 0 0 100px white; }
+}
+
+@keyframes checkmark-opacity {
+    0%, 100% { opacity: 0; }
+    30%, 70% { opacity: 1; }
 }
