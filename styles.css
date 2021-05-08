@@ -3,9 +3,11 @@
 
     --gridgradient: linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
 
-    --bgcolor: white;
+    --bgcolor: #fff;
     --bgcolor2: #eee;
     --fgcolor: #333;
+
+    --boardborder: #ddd;
 
     --hintcolor: #888;
     --hintcolor-selected: #666;
@@ -22,10 +24,11 @@
     --buttonfg-hovered: #000;
 
     --buttonbg-selected: #666;
-    --buttonfg-selected: white;
+    --buttonfg-selected: #fff;
     --buttonbg-selected-hovered: #333;
-    --buttonfg-selected-hovered: white;
+    --buttonfg-selected-hovered: #fff;
 
+    --modalbg: rgba(64, 64, 64, 0.9);
     --modalshadowcolor: rgba(64, 64, 64, 0.1);
 }
 
@@ -188,7 +191,7 @@ body {
     display: inline-flex;
     flex-direction: column;
     padding: 0 20px 20px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--boardborder);
     border-radius: 10px;
 }
 
@@ -277,7 +280,7 @@ body {
     top: 0; bottom: 0; left: 0; right: 0;
     align-items: center;
     justify-content: center;
-    background: rgba(64, 64, 64, 0.9);
+    background: var(--modalbg);
 }
 
 .modal-closed, .modal-closed * {
@@ -340,6 +343,7 @@ button:focus, button:hover {
     background: var(--buttonbg-hovered);
     box-shadow: 0 0 0 5px var(--buttonbg-hovered);
     color: var(--buttonfg-focus);
+    outline: none;
 }
 
 .button-selected {
@@ -433,19 +437,19 @@ button:focus, button:hover {
 #checkmark-container::before {
     content: '';
     position: absolute;
-    margin-top: -30px;
     display: block;
     background: white;
-    box-shadow: 0 0 0px 0px rgba(255, 255, 255, 0);
-    width: 1px;
-    height: 1px;
-    border-radius: 100%;
+    opacity: 0.5;
+    width: 0;
+    height: 0;
+    border-radius: 1000px;
     animation: checkmark-shadow 1s ease-in;
 }
 
 .checkmark {
     display: inline-block;
-    transform: translateY(-30px) rotate(45deg);
+    margin-top: -20px;
+    transform: rotate(45deg);
     height: 100px;
     width: 50px;
     border-bottom: 30px solid #78b13f;
@@ -455,11 +459,95 @@ button:focus, button:hover {
 }
 
 @keyframes checkmark-shadow {
-    0%, 100% { box-shadow: 0 0 0 0px white; }
-    30%, 70% { box-shadow: 0 0 0 100px white; }
+    0%, 100% { width: 0; height: 0; opacity: 0.5; }
+    30%, 70% { width: 200px; height: 200px; opacity: 1; }
 }
 
 @keyframes checkmark-opacity {
     0%, 100% { opacity: 0; }
     30%, 70% { opacity: 1; }
+}
+
+.darkmode-button {
+    position: absolute;
+    top: 0; right: 0;
+}
+
+.darkmode-button button {
+    font-size: 20px;
+    background: none;
+    box-shadow: none;
+    padding: 10px;
+    width: 44px;
+    height: 44px;
+}
+
+/* based on https://css.gg/sun */
+.sun-icon {
+    box-sizing: border-box;
+    position: relative;
+    display: block;
+    width: 24px;
+    height: 24px;
+    background:
+        linear-gradient(to bottom,
+            currentColor 4px,transparent 0)
+            no-repeat 5px -6px/1px 6px,
+        linear-gradient(to bottom,
+            currentColor 4px,transparent 0)
+            no-repeat 5px 14px/1px 6px,
+        linear-gradient(to bottom,
+            currentColor 4px,transparent 0)
+            no-repeat -8px 5px/6px 1px,
+        linear-gradient(to bottom,
+            currentColor 4px,transparent 0)
+            no-repeat 14px 5px/6px 1px;
+    border-radius: 100px;
+    box-shadow: inset 0 0 0 1px;
+    border: 6px solid transparent
+}
+.sun-icon::after,
+.sun-icon::before {
+    content: "";
+    display: block;
+    box-sizing: border-box;
+    position: absolute;
+    width: 24px;
+    height: 1px;
+    border-right: 4px solid;
+    border-left: 4px solid;
+    left: -6px;
+    top: 5px
+}
+.sun-icon::before {
+    transform: rotate(-45deg)
+}
+.sun-icon::after {
+    transform: rotate(45deg)
+}
+
+/* based on https://css.gg/moon */
+.moon-icon,
+.moon-icon::after {
+    display: block;
+    box-sizing: border-box;
+    border-radius: 50%
+}
+.moon-icon {
+    overflow: hidden;
+    position: relative;
+    transform: translateX(2px) rotate(-135deg);
+    width: 20px;
+    height: 20px;
+    border: 1px solid;
+    border-bottom-color: transparent
+}
+.moon-icon::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 22px;
+    border: 1px solid white;
+    top: 8px;
+    left: 2px
 }

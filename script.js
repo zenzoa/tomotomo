@@ -35,6 +35,8 @@ let colHintsSelected = false
 let seqLengthIndicator = null
 let lastSequenceLength = 0
 
+let isDarkMode = false
+
 let DOUBLE_CLICK_TIME = 300
 
 let gradientColors = [
@@ -570,6 +572,54 @@ let closeModal = (id) => {
     modal.className = modal.className.replace('modal-open', 'modal-closed')
 }
 
+let setLightMode = () => {
+    let root = document.querySelector(':root')
+    root.style.setProperty('--bgcolor', '#fff')
+    root.style.setProperty('--bgcolor2', '#eee')
+    root.style.setProperty('--fgcolor', '#333')
+    root.style.setProperty('--boardborder', '#ddd')
+    root.style.setProperty('--hintcolor', '#888')
+    root.style.setProperty('--hintcolor-selected', '#666')
+    root.style.setProperty('--hintcolor-solved', '#ccc')
+    root.style.setProperty('--buttonbg', '#e9e9e9')
+    root.style.setProperty('--buttonfg', '#666')
+    root.style.setProperty('--buttonbg-hovered', '#d9d9d9')
+    root.style.setProperty('--buttonfg-hovered', '#000')
+    root.style.setProperty('--buttonbg-selected', '#666')
+    root.style.setProperty('--buttonfg-selected', '#fff')
+    root.style.setProperty('--buttonbg-selected-hovered', '#333')
+    root.style.setProperty('--buttonfg-selected-hovered', '#fff')
+    root.style.setProperty('--modalbg', 'rgba(64, 64, 64, 0.9)')
+    root.style.setProperty('--modalshadowcolor', 'rgba(64, 64, 64, 0.1)')
+    let darkmodeButton = document.getElementById('darkmode')
+    darkmodeButton.innerHTML = '<i class="sun-icon"></i>'
+    isDarkMode = false
+}
+
+let setDarkMode = () => {
+    let root = document.querySelector(':root')
+    root.style.setProperty('--bgcolor', '#333')
+    root.style.setProperty('--bgcolor2', '#111')
+    root.style.setProperty('--fgcolor', '#fff')
+    root.style.setProperty('--boardborder', '#666')
+    root.style.setProperty('--hintcolor', '#ccc')
+    root.style.setProperty('--hintcolor-selected', '#fff')
+    root.style.setProperty('--hintcolor-solved', '#777')
+    root.style.setProperty('--buttonbg', '#444')
+    root.style.setProperty('--buttonfg', '#eee')
+    root.style.setProperty('--buttonbg-hovered', '#777')
+    root.style.setProperty('--buttonfg-hovered', '#fff')
+    root.style.setProperty('--buttonbg-selected', '#ccc')
+    root.style.setProperty('--buttonfg-selected', '#333')
+    root.style.setProperty('--buttonbg-selected-hovered', '#eee')
+    root.style.setProperty('--buttonfg-selected-hovered', '#111')
+    root.style.setProperty('--modalbg', 'rgba(0, 0, 0, 0.9)')
+    root.style.setProperty('--modalshadowcolor', 'rgba(0, 0, 0, 0.1)')
+    let darkmodeButton = document.getElementById('darkmode')
+    darkmodeButton.innerHTML = '<i class="moon-icon"></i>'
+    isDarkMode = true
+}
+
 window.onresize = () => {
     setCellSize()
 
@@ -668,6 +718,13 @@ window.onload = () => {
             guessButton.className = guessButton.className.replace('button-unselected', 'button-selected')
             guessing = true
         }
+    })
+
+    // dark mode button
+    let darkmodeButton = document.getElementById('darkmode')
+    darkmodeButton.addEventListener('click', () => {
+        if (isDarkMode) setLightMode()
+        else setDarkMode()
     })
 
     // start with 10x10 puzzle
