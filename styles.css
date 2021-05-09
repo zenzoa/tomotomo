@@ -145,10 +145,26 @@ body.darkmode::before {
     flex-direction: row;
 }
 
+.board:not(.board-solved) .row:nth-child(5n):not(:last-child) .cell::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .cell {
     width: var(--cellsize);
     height: var(--cellsize);
     position: relative;
+}
+
+.board:not(.board-solved) .cell:nth-child(5n):not(:last-child)::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .cell::after {
