@@ -365,8 +365,10 @@ let clickCell = (x, y) => {
             cellValueThisClick = ' '
         }
     } else {
-        if (doubleClicked && lastCellClickedX === x && lastCellClickedY === y) {
-            cellValueThisClick = '-'
+        if (doubleClicked) {
+            if (lastCellClickedX === x && lastCellClickedY === y) {
+                cellValueThisClick = '-'
+            }
         } else if (valueGrid[y][x] !== '#' && valueGrid[y][x] !== '-') {
             cellValueThisClick = '#'
         } else {

@@ -150,7 +150,7 @@ body.darkmode::before {
     display: block;
     position: absolute;
     top: 0; bottom: 0; left: 0; right: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .cell {
@@ -164,7 +164,7 @@ body.darkmode::before {
     display: block;
     position: absolute;
     top: 0; bottom: 0; left: 0; right: 0;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .cell::after {
@@ -404,7 +404,7 @@ button {
     transform: translateZ(0)
 }
 
-button:focus, button:hover {
+button:hover {
     background: var(--buttonbg-hovered);
     box-shadow: 0 0 0 5px var(--buttonbg-hovered);
     color: var(--buttonfg-focus);
@@ -417,7 +417,7 @@ button:focus, button:hover {
     color: var(--buttonfg-selected);
 }
 
-.button-selected:focus, .button-selected:hover {
+.button-selected:hover {
     background: var(--buttonbg-selected-hovered);
     box-shadow: 0 0 0 5px var(--buttonbg-selected-hovered);
     color: var(--buttonfg-selected);
@@ -529,8 +529,8 @@ button:focus, button:hover {
 }
 
 @keyframes checkmark-opacity {
-    0%, 100% { opacity: 0; }
-    30%, 70% { opacity: 1; }
+    0%, 100% { opacity: 0; transform: rotate(45deg) scale(0); }
+    30%, 70% { opacity: 1; transform: rotate(45deg) scale(1); }
 }
 
 .darkmode-button {

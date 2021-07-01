@@ -4,7 +4,7 @@ onmessage = (e) => {
     let rowHints = null
     let colHints = null
     let passes = 0
-    while (passes < 50) {
+    while (passes < 100) {
         puzzleGrid = createPuzzle(size, size)
         let hints = createHints(puzzleGrid)
         rowHints = hints.rowHints
