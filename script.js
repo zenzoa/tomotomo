@@ -359,16 +359,16 @@ let clickCell = (x, y) => {
     if (guessing) {
         if (doubleClicked && lastCellClickedX === x && lastCellClickedY === y) {
             cellValueThisClick = '&'
+            doubleClicked = false
         } else if (valueGrid[y][x] !== '?' && valueGrid[y][x] !== '&') {
             cellValueThisClick = '?'
         } else {
             cellValueThisClick = ' '
         }
     } else {
-        if (doubleClicked) {
-            if (lastCellClickedX === x && lastCellClickedY === y) {
-                cellValueThisClick = '-'
-            }
+        if (doubleClicked && lastCellClickedX === x && lastCellClickedY === y) {
+            cellValueThisClick = '-'
+            doubleClicked = false
         } else if (valueGrid[y][x] !== '#' && valueGrid[y][x] !== '-') {
             cellValueThisClick = '#'
         } else {
