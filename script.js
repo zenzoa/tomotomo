@@ -69,18 +69,32 @@ let setGradient = () => {
 }
 
 let markIncorrectCells = () => {
-    let allCorrect = true
+    let incorrectCells = []
     for (let y = 0; y < puzzleHeight; y++) {
         for (let x = 0; x < puzzleWidth; x++) {
             let cellValue = valueGrid[y][x]
             let puzzleValue = puzzleGrid[y][x]
             if ((cellValue === '#' && puzzleValue === '-') || (cellValue === '-' && puzzleValue === '#')) {
-                cellGrid[y][x].className = cellGrid[y][x].className.replace('cell-unmarked', 'cell-marked')
-                allCorrect = false
+                incorrectCells.push({x, y})
             }
         }
     }
-    if (allCorrect) {
+    if (incorrectCells.length > 0) {
+        openModal('check-modal')
+        document.getElementById('mark-yes').addEventListener('click', () => {
+            incorrectCells.forEach(cellPos => {
+                let cell = cellGrid[cellPos.y][cellPos.x]
+                cell.className = cell.className.replace('cell-unmarked', 'cell-marked')
+            })
+            setTimeout(() => {
+                let markedCells = document.querySelectorAll('.cell-marked')
+                for (let i = 0; i < markedCells.length; i++) {
+                    markedCells[i].className = markedCells[i].className.replace('cell-marked', 'cell-unmarked')
+                }
+            }, 2000)
+            closeModal('check-modal')
+        })
+    } else {
         let grid = document.getElementById('grid')
         let checkmarkContainer = document.createElement('div')
         checkmarkContainer.id = 'checkmark-container'
@@ -92,13 +106,6 @@ let markIncorrectCells = () => {
             checkmark.remove()
             checkmarkContainer.remove()
         }, 1000)
-    } else {
-        setTimeout(() => {
-            let markedCells = document.querySelectorAll('.cell-marked')
-            for (let i = 0; i < markedCells.length; i++) {
-                markedCells[i].className = markedCells[i].className.replace('cell-marked', 'cell-unmarked')
-            }
-        }, 1500)
     }
 }
 
@@ -710,9 +717,12 @@ window.onload = () => {
         closeModal('solve-modal')
     })
 
-    // check button
+    // check modal
     document.getElementById('check').addEventListener('click', () => {
         markIncorrectCells()
+    })
+    document.getElementById('mark-no').addEventListener('click', () => {
+        closeModal('check-modal')
     })
 
     // guess button
