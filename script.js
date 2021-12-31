@@ -57,6 +57,43 @@ let gradientColors = [
     '#8e4994'
 ]
 
+let saveState = () => {
+    let data = {
+        isDarkMode,
+        puzzleWidth,
+        puzzleHeight,
+        puzzleGrid,
+        valueGrid,
+        rowHints,
+        colHints
+    }
+    let stringifiedData = JSON.stringify(data)
+    localStorage.setItem('tomotomo', stringifiedData)
+}
+
+let loadState = () => {
+    let stringifiedData = localStorage.getItem('tomotomo')
+    if (stringifiedData) {
+        try {
+            let data = JSON.parse(stringifiedData)
+            if (data.isDarkMode) setDarkMode()
+            puzzleWidth = data.puzzleWidth
+            puzzleHeight = data.puzzleHeight
+            puzzleGrid = data.puzzleGrid
+            valueGrid = data.valueGrid
+            rowHints = data.rowHints
+            colHints = data.colHints
+            drawBoard()
+            return true
+        } catch (e) {
+            console.log('Unable to load game state', e)
+            return false
+        }
+    } else {
+        return false
+    }
+}
+
 let setGradient = () => {
     let angle = Math.floor(Math.random() * 359)
     let midpoint = Math.floor(Math.random() * 50) + 25
@@ -350,6 +387,8 @@ let modifyCell = (x, y) => {
         seqLengthIndicator.style.left = (gridX + cellSize * x + cellSize / 2 - 48) + 'px'
     }
     lastSequenceLength = sequenceLength
+
+    saveState()
 }
 
 let clickCell = (x, y) => {
@@ -393,7 +432,15 @@ let clickCell = (x, y) => {
 
 let drawCell = (x, y) => {
     let cell = document.createElement('div')
-    cell.className = 'cell cell-empty cell-unmarked'
+
+    cell.className = 'cell '
+    if (valueGrid[y][x] === '#') cell.className += 'cell-true'
+    else if (valueGrid[y][x] === '-') cell.className += 'cell-false'
+    else if (valueGrid[y][x] === '?') cell.className += 'cell-guess-true'
+    else if (valueGrid[y][x] === '&') cell.className += 'cell-guess-false'
+    else cell.className += 'cell-empty'
+    cell.className += ' cell-unmarked'
+
     cell.id = 'cell-' + x + '-' + y
     cellGrid[y][x] = cell
 
@@ -475,16 +522,12 @@ let drawHints = (hints, type) => {
 
 let drawBoard = () => {
     cellGrid = []
-    valueGrid = []
     for (let y = 0; y < puzzleHeight; y++) {
         let cellRow = []
-        let valueRow = []
         for (let x = 0; x < puzzleWidth; x++) {
             cellRow.push(null)
-            valueRow.push(' ')
         }
         cellGrid.push(cellRow)
-        valueGrid.push(valueRow)
     }
     
 
@@ -566,6 +609,15 @@ let newPuzzle = (size) => {
             rowHints = e.data.rowHints
             colHints = e.data.colHints
             spinner.className = 'hidden'
+
+            valueGrid = []
+            for (let y = 0; y < puzzleHeight; y++) {
+                let valueRow = []
+                for (let x = 0; x < puzzleWidth; x++) {
+                    valueRow.push(' ')
+                }
+                valueGrid.push(valueRow)
+            }
 
             drawBoard()
 
@@ -742,10 +794,14 @@ window.onload = () => {
     darkmodeButton.addEventListener('click', () => {
         if (isDarkMode) setLightMode()
         else setDarkMode()
+        saveState()
     })
 
-    // start with 10x10 puzzle
-    newPuzzle(10)
+    // try to load existing puzzle
+    if (loadState() === false) {
+        // start with 10x10 puzzle
+        newPuzzle(10)
+    }
 
     // fade out splashscreen
     setTimeout(() => {
