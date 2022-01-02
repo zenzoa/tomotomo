@@ -31,9 +31,11 @@ let rowHintElements = []
 let colHintElements = []
 let rowHintsSelected = false
 let colHintsSelected = false
+let incorrectCells = []
 
 let seqLengthIndicator = null
 let lastSequenceLength = 0
+
 
 let isDarkMode = false
 
@@ -105,8 +107,8 @@ let setGradient = () => {
     root.style.setProperty('--gridgradient', gradient)
 }
 
-let markIncorrectCells = () => {
-    let incorrectCells = []
+let checkIncorrectCells = () => {
+    incorrectCells = []
     for (let y = 0; y < puzzleHeight; y++) {
         for (let x = 0; x < puzzleWidth; x++) {
             let cellValue = valueGrid[y][x]
@@ -118,19 +120,6 @@ let markIncorrectCells = () => {
     }
     if (incorrectCells.length > 0) {
         openModal('check-modal')
-        document.getElementById('mark-yes').addEventListener('click', () => {
-            incorrectCells.forEach(cellPos => {
-                let cell = cellGrid[cellPos.y][cellPos.x]
-                cell.className = cell.className.replace('cell-unmarked', 'cell-marked')
-            })
-            setTimeout(() => {
-                let markedCells = document.querySelectorAll('.cell-marked')
-                for (let i = 0; i < markedCells.length; i++) {
-                    markedCells[i].className = markedCells[i].className.replace('cell-marked', 'cell-unmarked')
-                }
-            }, 2000)
-            closeModal('check-modal')
-        })
     } else {
         let grid = document.getElementById('grid')
         let checkmarkContainer = document.createElement('div')
@@ -144,6 +133,20 @@ let markIncorrectCells = () => {
             checkmarkContainer.remove()
         }, 1000)
     }
+}
+
+let markIncorrectCells = () => {
+    incorrectCells.forEach(cellPos => {
+        let cell = cellGrid[cellPos.y][cellPos.x]
+        cell.className = cell.className.replace('cell-unmarked', 'cell-marked')
+    })
+    setTimeout(() => {
+        let markedCells = document.querySelectorAll('.cell-marked')
+        for (let i = 0; i < markedCells.length; i++) {
+            markedCells[i].className = markedCells[i].className.replace('cell-marked', 'cell-unmarked')
+        }
+    }, 2000)
+    closeModal('check-modal')
 }
 
 let checkHintsForLine = (hints, line) => {
@@ -771,6 +774,9 @@ window.onload = () => {
 
     // check modal
     document.getElementById('check').addEventListener('click', () => {
+        checkIncorrectCells()
+    })
+    document.getElementById('mark-yes').addEventListener('click', () => {
         markIncorrectCells()
     })
     document.getElementById('mark-no').addEventListener('click', () => {
